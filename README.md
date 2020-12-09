@@ -14,15 +14,15 @@ You will need a Stripe account to use this app.  You can sign up for one [here](
 
 ## Stripe Billing Setup
 
-Before you use this app, you will need to create some products.  To do so, log into the Stripe Dashboard and head to the [products page](https://dashboard.stripe.com/test/products).  Once there, use the "Add Product" button to add the following three products:
-
-There is no need to enter descriptions or images, but make sure you set a monthly price and make sure "Recurring" is selected.  
+Before you use this app, you will need to create some products.  To do so, log into the Stripe Dashboard and head to the [products page](https://dashboard.stripe.com/test/products).  Once there, use the "Add Product" button to add the following three products: 
 
 1. Gold plan
 2. Silver plan 
 3. Basic plan
 
-You can create more, but this app is configured to dynamically display 3.
+There is no need to enter descriptions or images, but make sure you set a monthly price and make sure "Recurring" is selected. 
+
+You can create more products, but this app is configured to dynamically display 3.
 
 ## Customer Portal Setup (optional)
 
