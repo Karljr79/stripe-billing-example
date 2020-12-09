@@ -1,0 +1,80 @@
+t<!DOCTYPE html>
+<html>
+  <%- include('partials/header') %>
+
+  <body>
+     <%- include('partials/navbar') %>
+
+    <main role="main">
+       <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+      <h1 class="display-4">Welcome, <%= customer.name %>!</h1>
+      <p class="lead">Let's get started! Select one of our plans below</p>
+      
+    </div>
+
+    <div id="ctrPlans" class="container-fluid">
+      <div class="card-deck mb-3 text-center">
+        <div class="card mb-4 box-shadow">
+          <div class="card-header">
+            <h4 class="my-0 font-weight-normal"><%= prices.data[0].product.name %></h4>
+          </div>
+          <form class="card-body" role="form" action="/payment_page" method="post">
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">$<%= toFixed(prices.data[0].unit_amount) %> <small class="text-muted">/ mo</small></h1>
+            <input type="hidden" name="priceId" value=<%= prices.data[0].id %>>
+            <input type="hidden" name="priceAmount" value=<%= prices.data[0].unit_amount %>>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>1 monthly target</li>
+              <li>Coruscant Only</li>
+              <li>Holonet support</li>
+              <li>Access to Tier 3 Hunters</li>
+            </ul>
+            <button type="submit" class="btn btn-lg btn-block btn-primary" id=0>Select</button>
+          </form>
+          </div>
+        </div>
+        <div class="card mb-4 box-shadow">
+          <div class="card-header">
+            <h4 class="my-0 font-weight-normal"><%= prices.data[1].product.name %></h4>
+          </div>
+          <form class="card-body" role="form" action="/payment_page" method="post">
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title" spellcheckker="false">$<%= toFixed(prices.data[1].unit_amount) %> <small class="text-muted">/ mo</small></h1>
+            <input type="hidden" name="priceId" value=<%= prices.data[1].id %>>
+            <input type="hidden" name="priceAmount" value=<%= prices.data[1].unit_amount %>>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>3 monthly targets</li>
+              <li>Coruscant and Core Worlds</li>
+              <li>Holonet Support</li>
+              <li>Access Tier 2 Hunters</li>
+            </ul>
+            <button type="submit" class="btn btn-lg btn-block btn-secondary" id=1>Select</button>
+            </form>
+          </div>
+        </div>
+        <div class="card mb-4 box-shadow">
+          <div class="card-header">
+            <h4 class="my-0 font-weight-normal"><%= prices.data[2].product.name %></h4>
+          </div>
+          <form class="card-body" role="form" action="/payment_page" method="post">
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">$<%= toFixed(prices.data[2].unit_amount) %> <small class="text-muted">/ mo</small></h1>
+            <input type="hidden" name="priceId" value=<%= prices.data[2].id %>>
+            <input type="hidden" name="priceAmount" value=<%= prices.data[2].unit_amount %>>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>6 monthly targets</li>
+              <li>Coruscant, Core, and Outer Rim</li>
+              <li>Holonet Support</li>
+              <li>Access to Tier 1 Hunters</li>
+            </ul>
+            <button type="submit" class="btn btn-lg btn-block btn-warning" id=2>Select</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </main>
+
+    <%- include('partials/footer') %>
+  </body>
+</html>

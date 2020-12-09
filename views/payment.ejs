@@ -1,0 +1,189 @@
+t<!DOCTYPE html>
+<html>
+  <%- include('partials/header') %>
+  <%- include('partials/navbar') %>
+  <link rel="stylesheet" href="/global.css">
+
+  <body>
+    <div class="container-fluid">
+    <main role="main">
+       <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+      <h1 class="display-4">Almost There!</h1>
+      <p class="lead">Enter your Credit Card information below</p> 
+    </div>
+      
+    <div class="col-md-12">
+			<div class="row">
+				<div class="col-md-6" id="paymentPane">
+          <div class="container">
+           <form id="payment-form">
+            <ul class="list-unstyled mt-3 mb-4">
+             <li></li>
+             <li>Your name: <%= customer.name %></li>
+             <li>Your email: <%= customer.email %></li>
+             <li>Due Today: $<%= toFixed(priceAmount) %></li>
+             <hr>
+            </ul>
+          <div id="card-element">
+           <!--Stripe.js injects the Card Element-->
+          </div>
+          <button id="submit">
+             <div class="spinner hidden" id="spinner"></div>
+              <span id="button-text">Pay</span>
+          </button>
+          <p id="card-error" role="alert"></p>
+          <p class="result-message hidden">
+           Payment succeeded, see the result in your
+           <a href="" target="_blank">Stripe dashboard.</a> Refresh the page to pay again.
+          </p>
+         </form>
+        </div>
+			</div>
+			<div class="col-md-6" style="visibility:hidden" id="confirmationPane">
+        <li id="txtPaymentIntentStatus"></li>
+        <li id="txtPaymentIntentId"></li>
+        <li id="txtChargeId"></li>
+        <li><a id="hrefInvoice" href="url">Invoice Link</a></li>
+        <li id="txtChargeAmount"></li>
+        <form class="d-flex" id="loginStatus" action="/customer_portal" method="get">
+          <input type="hidden" name="id" value='<%= customer.id %>'></input>
+          <button type="submit" class="btn btn-outline-success">Account</button>
+        </form>
+			</div>
+			</div>
+		</div>
+    </main>
+    </div>
+  </body>
+  <%- include('partials/footer') %>
+
+</html>
+
+<script>
+  
+window.onload = function() {
+  document.getElementById('accountForm').style.display = 'none';
+};
+
+let stripe = Stripe("<%= key %>");
+let elements = stripe.elements();
+
+var card = elements.create("card");
+// Inject the card element
+card.mount("#card-element");
+  
+ 
+var form = document.getElementById('payment-form');  
+
+//Add listener and handle the click event  
+form.addEventListener('submit', function (ev) {
+  ev.preventDefault();
+  handlePaymentClick(ev);
+});
+  
+function handlePaymentClick(event) {
+  let billingName = "<%= customer.name %>";
+  let price = "<%= priceId %>";
+  let customerId = "<%= customer.id %>";
+  loading(true);
+  stripe.createPaymentMethod({
+      type: 'card',
+      card: card,
+      billing_details: {
+        name: billingName,
+      },
+    })
+    .then((result) => {
+      if (result.error) {
+        displayError(result);
+      } else {
+        console.log(result.paymentMethod.id);
+        createSubscription({
+          customerId: customerId,
+          paymentMethodId: result.paymentMethod.id,
+          priceId: price,
+        });
+      }
+    });
+}
+  
+function createSubscription({ customerId, paymentMethodId, priceId }) {
+    //Make a POST request to the server to create the subscription
+    fetch('/create_subscription', {
+      method: 'post',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        customerId: customerId,
+        paymentMethodId: paymentMethodId,
+        priceId: priceId,
+      }),
+    })
+    .then((response) => {
+        //convert response to JSON
+        return response.json();
+      })
+    //If the card is declined, display an error to the user.
+    .then((result) => {
+      if (result.error) {
+        // Handle any errors
+        throw result;
+      }
+      return result;
+    })
+    // Handle the result and update the UI
+    .then((result) => {
+      console.log(result);
+      loading(false);
+      updateUi(result);
+    })  
+}
+  
+// Helper to show a spinner on payment submission
+var loading = function(isLoading) {
+  if (isLoading) {
+    // Disable the button and show a spinner
+    document.querySelector("button").disabled = true;
+    document.querySelector("#spinner").classList.remove("hidden");
+    document.querySelector("#button-text").classList.add("hidden");
+  } else {
+    document.querySelector("button").disabled = false;
+    document.querySelector("#spinner").classList.add("hidden");
+    document.querySelector("#button-text").classList.remove("hidden");
+  }
+};
+
+// Helper to update the UI post-payment  
+function updateUi(subscription) {
+  //Populate values after success
+  document.getElementById("confirmationPane").style.visibility = "visible";
+  document.getElementById("txtPaymentIntentId").innerHTML = "Payment Intent ID: " + subscription.latest_invoice.payment_intent.id;
+  document.getElementById("txtPaymentIntentStatus").innerHTML = "Status: " + subscription.latest_invoice.payment_intent.status;
+  document.getElementById("txtChargeId").innerHTML = "Charge ID: " + subscription.latest_invoice.charge;
+  document.getElementById("txtChargeAmount").innerHTML = "Amount Paid: $" + formatPrice(subscription.latest_invoice.amount_paid);
+  document.getElementById("hrefInvoice").href = subscription.latest_invoice.hosted_invoice_url;
+  
+  //Update the payment pane and hide it
+  document.getElementById("paymentPane").style.visibility = "hidden";
+  document.querySelector("button").disabled = true;
+}
+ 
+//Helper to format the price  
+function formatPrice(price) {
+  let newPrice = price/100;
+  return newPrice.toFixed(2);
+}
+ 
+//Helper to display errors in the card element
+function displayError(event) {
+  loading(false);
+  let displayError = document.getElementById('card-error');
+  if (event.error) {
+    displayError.textContent = event.error.message;
+  } else {
+    displayError.textContent = '';
+  }
+}
+
+</script>
